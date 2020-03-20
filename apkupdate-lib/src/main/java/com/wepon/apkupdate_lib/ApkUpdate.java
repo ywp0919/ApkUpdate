@@ -388,6 +388,9 @@ public class ApkUpdate {
         return new Builder();
     }
 
+    /**
+     * 后面可以考虑，通过lifecycle来监听其生命周期，内部做解绑释放的操作。
+     */
     public static void cancelAll() {
         Collection<ApkUpdate> values = CACHE.values();
         for (ApkUpdate apkUpdate : values) {
