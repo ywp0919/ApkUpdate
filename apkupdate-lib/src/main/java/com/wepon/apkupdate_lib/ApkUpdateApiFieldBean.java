@@ -149,18 +149,19 @@ public class ApkUpdateApiFieldBean {
     }
 
 
-    //{
-    //  "updateLog": "update log...",
-    //  "appName": "UpdateTest",
+    // {
+    //  "updateLog": "\r\n1、优化接口。\r\n2、优化更新提示界面。",
+    //  "updateTitle":"更新标题",
+    //  "appName": "UpdateDemo",
     //  "packageName": "com.wepon.apkupdate",
     //  "versionCode": 2,
     //  "versionName": "1.2",
     //  "force": false,
-    //  "apkUrl": "http://iot-smart-earphone.oss-cn-hangzhou.aliyuncs.com/autoupdate/apk/a14b2b65887fc1ecae3eff4fb66c50e3/apkupdate-version-2.apk",
-    //  "apkHash": "a3af65bc5b7da503b2630657559e4121",
-    //  "apkSize": "1681770"
+    //  "apkUrl": "https://wepon.oss-cn-hangzhou.aliyuncs.com/apkupdate_lib/apkupdate_version_2.apk",
+    //  "apkHash": "",
+    //  "apkSize": ""
     //}
-    static ApkUpdateApiFieldBean newDefault(){
+    static ApkUpdateApiFieldBean newDefault() {
         ApkUpdateApiFieldBean bean = new ApkUpdateApiFieldBean();
         bean.updateTitleFieldName = "updateTitle";
         bean.updateLogFieldName = "updateLog";
