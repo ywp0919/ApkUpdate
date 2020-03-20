@@ -3,7 +3,8 @@
 buildscript {
 
     repositories {
-        maven { url uri("../repo") }
+        maven { url 'https://jitpack.io' }
+//        maven { url uri("../repo") }
         maven { url 'https://maven.aliyun.com/repository/public' }
         google()
         jcenter()
@@ -16,7 +17,8 @@ buildscript {
 
 allprojects {
     repositories {
-        maven { url uri("../repo") }
+        maven { url 'https://jitpack.io' }
+//        maven { url uri("../repo") }
         maven { url 'https://maven.aliyun.com/repository/public' }
         google()
         jcenter()
