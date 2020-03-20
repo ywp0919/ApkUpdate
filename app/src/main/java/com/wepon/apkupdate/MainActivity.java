@@ -11,18 +11,16 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadPoolExecutor;
-
 import com.wepon.apkupdate_lib.ApkDownloadListener;
 import com.wepon.apkupdate_lib.ApkUpdate;
 import com.wepon.apkupdate_lib.ApkUpdateApiFieldBean;
 import com.wepon.apkupdate_lib.ApkUpdateBean;
-import com.wepon.apkupdate_lib.IApkUpdateHttpServer;
 import com.wepon.apkupdate_lib.ApkUpdateManagerListener;
+import com.wepon.apkupdate_lib.IApkUpdateHttpServer;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.Executors;
 
 public class MainActivity extends AppCompatActivity {
 
