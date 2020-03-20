@@ -9,7 +9,6 @@ import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.text.TextUtils;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
@@ -18,11 +17,11 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.lang.ref.WeakReference;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadPoolExecutor;
 
 
 /**
@@ -44,7 +43,7 @@ public class ApkUpdate {
     static final int NOT_DEFINE = -1;
     static String TAG = "ApkUpdate";
 
-    private static Map<String, WeakReference<ApkUpdate>> CACHE = new HashMap<>();
+    private static Map<String, ApkUpdate> CACHE = new HashMap<>();
 
     private WeakReference<Context> contextRef;
 
@@ -102,6 +101,8 @@ public class ApkUpdate {
      * 下载的apk的命名 getContext().getPackageName() + "-" + newVersionCode + ".apk";
      */
     private String downloadApkFileName;
+    private ApkDownloadUtils apkDownloadUtils;
+    private volatile boolean isCancel = false;
 
 
     private ApkUpdate(Builder builder) {
@@ -126,7 +127,6 @@ public class ApkUpdate {
 
     private ApkUpdate() {
     }
-
 
     /**
      * 外部也可以自己获取到数据后直接传入json.
@@ -155,6 +155,9 @@ public class ApkUpdate {
                 @Override
                 public void onSuccess(String result) {
                     // 异步请求成功之后进行是否要更新的逻辑判断。
+                    if (isCancel) {
+                        return;
+                    }
                     parseUpdateInfo(result);
                 }
 
@@ -209,9 +212,7 @@ public class ApkUpdate {
 
             String downloadUrl = apkUpdateBean.getApkDownloadUrl();
             if (!TextUtils.isEmpty(downloadUrl)) {
-                CACHE.put(downloadUrl, new WeakReference<>(ApkUpdate.this));
-                Log.d("Wepon", "put url:" + downloadUrl);
-                Log.d("Wepon", "put apkupdate:" + this);
+                CACHE.put(downloadUrl, ApkUpdate.this);
             }
 
             // 判断是否需要更新。
@@ -292,12 +293,15 @@ public class ApkUpdate {
      * 内部使用DownloadManager的下载流程
      */
     private void goInnerDownload() {
+        if (isCancel) {
+            return;
+        }
         // 触发下载 DownloadManager.
         if (TextUtils.isEmpty(apkUpdateBean.getApkDownloadUrl())) {
             ApkUpdateLogUtils.e("ApkUpdate : apkDownloadUrl is can not empty.");
             return;
         }
-        new ApkDownloadUtils(getContext(),
+        apkDownloadUtils = new ApkDownloadUtils(getContext(),
                 apkUpdateBean.getApkDownloadUrl(),
                 downloadApkFileName,
                 Utils.getAppName(getContext()),
@@ -308,7 +312,10 @@ public class ApkUpdate {
      * 外部调用下载的话就走下载请求的流程，并在有回调的时候给到外部。
      */
     private void goCustomDownloadApk() {
-        new ApkDownloadUtils(getContext(), apkUpdateBean.getApkDownloadUrl(),
+        if (isCancel) {
+            return;
+        }
+        apkDownloadUtils = new ApkDownloadUtils(getContext(), apkUpdateBean.getApkDownloadUrl(),
                 downloadApkFileName, apkDownloadListener);
     }
 
@@ -329,9 +336,12 @@ public class ApkUpdate {
             return;
         }
         if (CACHE.containsKey(apkDownloadUrl)
-                && CACHE.get(apkDownloadUrl) != null
-                && CACHE.get(apkDownloadUrl).get() != null) {
-            ApkUpdate apkUpdate = CACHE.get(apkDownloadUrl).get();
+                && CACHE.get(apkDownloadUrl) != null) {
+            ApkUpdate apkUpdate = CACHE.get(apkDownloadUrl);
+            if (apkUpdate == null) {
+                ApkUpdateLogUtils.e("ApkUpdate : apkUpdate had gc. ");
+                return;
+            }
             if (apkUpdate.apkDownloadListener != null) {
                 apkUpdate.goCustomDownloadApk();
             } else {
@@ -376,6 +386,31 @@ public class ApkUpdate {
 
     public static Builder newBuilder() {
         return new Builder();
+    }
+
+    public static void cancelAll() {
+        Collection<ApkUpdate> values = CACHE.values();
+        for (ApkUpdate apkUpdate : values) {
+            if (apkUpdate != null) {
+                apkUpdate.cancelTask();
+            }
+        }
+        CACHE.clear();
+    }
+
+    /**
+     * 取消任务
+     * 1.请求接口的任务
+     * 2.下载的任务
+     */
+    private void cancelTask() {
+        //1
+        isCancel = true;
+        ApkUpdateLogUtils.e("cancel:" + isCancel);
+        //2
+        if (apkDownloadUtils != null) {
+            apkDownloadUtils.cancel();
+        }
     }
 
 
@@ -442,7 +477,7 @@ public class ApkUpdate {
         /**
          * 外部也可以自己获取到数据后直接传入json.
          */
-        public ApkUpdate build(){
+        public ApkUpdate build() {
             return new ApkUpdate(this);
         }
     }

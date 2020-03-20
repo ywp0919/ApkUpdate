@@ -26,6 +26,7 @@ class ApkDownloadUtils {
     private long mDownloadId;
     private String mFileName;
     private String mDownloadApkPath;
+    private volatile boolean isCancel = false;
 
     /**
      * 这种使用内部的DownloadManager，没有回调，通知栏会有系统级别的样式展示下载进度。
@@ -42,9 +43,7 @@ class ApkDownloadUtils {
     ApkDownloadUtils(final Context context, final String urlStr, final String fileName, final ApkDownloadListener callback) {
         final File file = new File(context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS), fileName);
         if (file.exists()) {
-            callback.onProgressUpdate(100);
-            callback.downloadSuc(getUriFromFile(context, file));
-            return;
+            file.delete();
         }
         ApkUpdate.threadPool.execute(new Runnable() {
             @Override
@@ -63,6 +62,9 @@ class ApkDownloadUtils {
                         int len;
                         byte[] bs = new byte[1024];
                         while ((len = is.read(bs)) != -1) {
+                            if (isCancel) {
+                                return;
+                            }
                             os.write(bs, 0, len);
                             count += len;
                             final int finalCount = count;
@@ -73,6 +75,7 @@ class ApkDownloadUtils {
                                 }
                             });
                         }
+
                         ApkUpdate.mainHandler.post(new Runnable() {
                             @Override
                             public void run() {
@@ -93,6 +96,16 @@ class ApkDownloadUtils {
                 }
             }
         });
+    }
+
+    void cancel() {
+        if (mDownloadManager != null) {
+            if (mContext != null) {
+                mContext.unregisterReceiver(receiver);
+            }
+            mDownloadManager.remove(mDownloadId);
+        }
+        isCancel = true;
     }
 
     private Uri getUriFromFile(Context context, File file) {
@@ -119,8 +132,7 @@ class ApkDownloadUtils {
             mDownloadManager = (DownloadManager) mContext.getSystemService(Context.DOWNLOAD_SERVICE);
         }
         if (file.exists()) {
-            installAPK();
-            return;
+            file.delete();
         }
         if (mDownloadManager != null) {
             mDownloadId = mDownloadManager.enqueue(request);
