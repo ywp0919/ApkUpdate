@@ -76,6 +76,19 @@ public class MainActivity extends AppCompatActivity {
 
     /**
      * 只配置更新接口url，一键式调用。
+     * 更新接口的json字段需要按照默认格式配置
+     * {
+     *   "updateLog": "\r\n1、优化接口。\r\n2、优化更新提示界面。",
+     *   "updateTitle":"更新标题",
+     *   "appName": "UpdateDemo",
+     *   "packageName": "com.wepon.apkupdate",
+     *   "versionCode": 2,
+     *   "versionName": "1.2",
+     *   "force": false,
+     *   "apkUrl": "https://wepon.oss-cn-hangzhou.aliyuncs.com/apkupdate_lib/apkupdate_version_2.apk",
+     *   "apkHash": "",
+     *   "apkSize": ""
+     * }
      */
     public void testNetApiData(View view) {
         ApkUpdate.newBuilder()
