@@ -1,10 +1,12 @@
 package com.wepon.apkupdate;
 
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -24,10 +26,14 @@ import java.util.concurrent.Executors;
 
 public class MainActivity extends AppCompatActivity {
 
+    private TextView tvShow;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        tvShow = findViewById(R.id.tv_show);
         // 打开日志开关
         ApkUpdate.openLog(true);
         // 设置咱们外部的线程池来管理请求线程的创建。
@@ -90,6 +96,7 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onNoUpdateAvailable() {
                         // 没有更新
+                        tvShow.setText("自定义显示：没有更新");
                     }
 
                     @Override
@@ -106,14 +113,17 @@ public class MainActivity extends AppCompatActivity {
                                 .setPositiveButton("立即更新", new DialogInterface.OnClickListener() {
                                     @Override
                                     public void onClick(DialogInterface dialog, int which) {
+                                        // 同时可以显示下载的进度ui
+                                        tvShow.setText("自定义显示：开始更新");
+
                                         // 去下载更新。
                                         ApkUpdate.downloadApk(apkUpdateBean.getApkDownloadUrl());
-                                        // 同时可以显示下载的进度ui
                                     }
                                 })
                                 .create()
                                 .show();
 
+                        tvShow.setText("自定义显示：有更新");
                     }
                 })
                 // 用户可以根据以下回调自定义下载的UI. 如果使用内置的则不需要设置此方法.
@@ -124,6 +134,8 @@ public class MainActivity extends AppCompatActivity {
                     public void downloadFailed(Throwable throwable) {
                         // 下载失败
                         // 可以取消进度ui
+                        Log.d("Wepon", "downloadFailed:" + throwable.getLocalizedMessage());
+                        tvShow.setText("自定义显示进度 ： 下载失败 ");
                     }
 
                     @Override
@@ -132,6 +144,10 @@ public class MainActivity extends AppCompatActivity {
                         // 可以取消进度ui
                         // 可以使用sdk的方法进行安装
                         ApkUpdate.installApk(uri);
+
+                        Log.d("Wepon", "downloadSuc uri:" + uri.getPath());
+
+                        tvShow.setText("自定义显示进度 ： 下载完成 ");
                     }
 
                     @Override
@@ -139,6 +155,8 @@ public class MainActivity extends AppCompatActivity {
                         // 进度回调，值为0-100.
                         Log.d("Wepon", "progress:" + progress);
                         // 可以刷新进度ui
+                        tvShow.setText("自定义显示进度 ： " + progress + "%");
+
                     }
                 })
                 .build()
@@ -189,5 +207,14 @@ public class MainActivity extends AppCompatActivity {
                 "}";
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        Log.d("Wepon", "完全退出Activity时记得要取消掉框架内的任务，否则会有内存泄露");
+        ApkUpdate.cancelAll();
+    }
 
+    public void goTestAc(View view) {
+        startActivity(new Intent(this, TestActivity.class));
+    }
 }
