@@ -410,6 +410,7 @@ public class ApkUpdate {
         //2
         if (apkDownloadUtils != null) {
             apkDownloadUtils.cancel();
+            apkDownloadUtils = null;
         }
     }
 
