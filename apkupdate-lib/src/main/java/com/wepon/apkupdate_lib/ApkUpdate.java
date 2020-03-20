@@ -140,7 +140,7 @@ public class ApkUpdate {
      * 先进行网络请求，获取接口信息。
      * 需要显示弹窗的话就要传activity的context，不需要的话随便传。
      */
-    public void update(@NonNull Context context) {
+    private void update(@NonNull Context context) {
         try {
             saveContext(context);
             if (TextUtils.isEmpty(updateInfoUrl)) {
@@ -478,11 +478,16 @@ public class ApkUpdate {
             return this;
         }
 
-        /**
-         * 外部也可以自己获取到数据后直接传入json.
-         */
-        public ApkUpdate build() {
-            return new ApkUpdate(this);
+        public ApkUpdate update(@NonNull Context context) {
+            ApkUpdate apkUpdate = new ApkUpdate(this);
+            apkUpdate.update(context);
+            return apkUpdate;
+        }
+
+        public ApkUpdate updateByJsonStr(String result, @NonNull Context context) {
+            ApkUpdate apkUpdate = new ApkUpdate(this);
+            apkUpdate.updateByJsonStr(result, context);
+            return apkUpdate;
         }
     }
 }

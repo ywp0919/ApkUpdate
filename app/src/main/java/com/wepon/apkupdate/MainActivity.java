@@ -60,7 +60,6 @@ public class MainActivity extends AppCompatActivity {
                         success(callBack);
                     }
                 })
-                .build()
                 .update(this);// 需要传入一个activity来显示dialog信息。
     }
 
@@ -70,7 +69,6 @@ public class MainActivity extends AppCompatActivity {
     public void testLocalData2(View view) {
         // 有些时候如果外部拿到了升级接口的json数据，也可以转换后传入直接调用。
         getApkUpdateBuilder()
-                .build()
                 .updateByJsonStr(getTestUpdateJsonString(), this);// 需要传入一个activity来显示dialog信息。
     }
 
@@ -93,7 +91,6 @@ public class MainActivity extends AppCompatActivity {
     public void testNetApiData(View view) {
         ApkUpdate.newBuilder()
                 .setUpdateInfoUrl("https://wepon.oss-cn-hangzhou.aliyuncs.com/apkupdate_lib/updateInfo") // 获取升级信息接口，demo这步是乱填的。
-                .build()
                 .update(this);
     }
 
@@ -172,7 +169,6 @@ public class MainActivity extends AppCompatActivity {
 
                     }
                 })
-                .build()
                 .update(this);
     }
 
