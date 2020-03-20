@@ -31,6 +31,8 @@ dependencies {
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'androidx.test.ext:junit:1.1.1'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
-    implementation 'com.wepon.apkupdate_lib:apkupdate:1.0.0'
+//    implementation 'com.wepon.apkupdate_lib:apkupdate:1.0.0'
 //    implementation project(path: ':apkupdate-lib')
+
+    implementation 'com.github.ywp0919:ApkUpdate:1.0.0'
 }
