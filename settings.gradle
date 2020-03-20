@@ -1,0 +1,3 @@
+rootProject.name='ApkUpdate'
+include ':app'
+include ':apkupdate-lib'

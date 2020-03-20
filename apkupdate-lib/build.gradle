@@ -1,0 +1,42 @@
+apply plugin: 'com.android.library'
+apply plugin: 'maven'
+
+
+android {
+    compileSdkVersion 29
+    buildToolsVersion "29.0.2"
+
+    defaultConfig {
+        minSdkVersion 16
+        targetSdkVersion 29
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles 'consumer-rules.pro'
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
+}
+
+dependencies {
+
+    compileOnly 'androidx.appcompat:appcompat:1.1.0'
+}
+
+group = 'com.wepon.apkupdate_lib'
+version = '1.0.0'
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            pom.artifactId = "apkupdate"
+            repository(url: uri('../repo'))
+        }
+    }
+}
