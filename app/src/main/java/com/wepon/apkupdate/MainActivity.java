@@ -76,16 +76,16 @@ public class MainActivity extends AppCompatActivity {
      * 只配置更新接口url，一键式调用。
      * 更新接口的json字段需要按照默认格式配置
      * {
-     *   "updateLog": "\r\n1、优化接口。\r\n2、优化更新提示界面。",
-     *   "updateTitle":"更新标题",
-     *   "appName": "UpdateDemo",
-     *   "packageName": "com.wepon.apkupdate",
-     *   "versionCode": 2,
-     *   "versionName": "1.2",
-     *   "force": false,
-     *   "apkUrl": "https://wepon.oss-cn-hangzhou.aliyuncs.com/apkupdate_lib/apkupdate_version_2.apk",
-     *   "apkHash": "",
-     *   "apkSize": ""
+     * "updateLog": "\r\n1、优化接口。\r\n2、优化更新提示界面。",
+     * "updateTitle":"更新标题",
+     * "appName": "UpdateDemo",
+     * "packageName": "com.wepon.apkupdate",
+     * "versionCode": 2,
+     * "versionName": "1.2",
+     * "force": false,
+     * "apkUrl": "https://wepon.oss-cn-hangzhou.aliyuncs.com/apkupdate_lib/apkupdate_version_2.apk",
+     * "apkHash": "",
+     * "apkSize": ""
      * }
      */
     public void testNetApiData(View view) {
@@ -220,6 +220,8 @@ public class MainActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         Log.d("Wepon", "完全退出Activity时记得要取消掉框架内的任务，否则会有内存泄露");
+        // 如果外部有设置系列监听事件，刚在设置了监听的activity退出的时候一定要取消掉任务。
+        // 如果使用一键式的，没有设置任何监听事件，刚不取消也不会导致内存泄露。
         ApkUpdate.cancelAll();
     }
 
