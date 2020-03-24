@@ -305,7 +305,8 @@ public class ApkUpdate {
                 apkUpdateBean.getApkDownloadUrl(),
                 downloadApkFileName,
                 Utils.getAppName(getContext()),
-                "正在下载新版本...");
+                "正在下载新版本...",
+                apkUpdateBean.getApkHash());
     }
 
     /**
@@ -316,7 +317,7 @@ public class ApkUpdate {
             return;
         }
         apkDownloadUtils = new ApkDownloadUtils(getContext(), apkUpdateBean.getApkDownloadUrl(),
-                downloadApkFileName, apkDownloadListener);
+                downloadApkFileName, apkUpdateBean.getApkHash(), apkDownloadListener);
     }
 
 
