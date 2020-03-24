@@ -9,16 +9,21 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
+import android.text.TextUtils;
 import android.widget.Toast;
 
 import androidx.core.content.FileProvider;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.math.BigInteger;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.security.MessageDigest;
 
 class ApkDownloadUtils {
     private DownloadManager mDownloadManager;
@@ -27,23 +32,35 @@ class ApkDownloadUtils {
     private String mFileName;
     private String mDownloadApkPath;
     private volatile boolean isCancel = false;
+    private String mDownDirPath = Environment.DIRECTORY_DOWNLOADS + File.separator + "/downloadApk";
 
     /**
      * 这种使用内部的DownloadManager，没有回调，通知栏会有系统级别的样式展示下载进度。
      */
-    ApkDownloadUtils(Context context, String url, String fileName, String title, String description) {
+    ApkDownloadUtils(Context context,
+                     String url, String fileName, String title, String description, String apkHash) {
         this.mContext = context;
         this.mFileName = fileName;
-        downloadApkByInnerMananger(url, fileName, title, description);
+        deleteOtherCache(context, fileName);
+        downloadApkByInnerMananger(url, fileName, title, description, apkHash);
     }
 
     /**
      * 这种使用http请求下载，并且给出回调，内部不做下载的IU显示，由调用者根据回调自行处理
      */
-    ApkDownloadUtils(final Context context, final String urlStr, final String fileName, final ApkDownloadListener callback) {
-        final File file = new File(context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS), fileName);
+    ApkDownloadUtils(final Context context,
+                     final String urlStr,
+                     final String fileName, String apkHash, final ApkDownloadListener callback) {
+        deleteOtherCache(context, fileName);
+        final File file = new File(context.getExternalFilesDir(mDownDirPath), fileName);
         if (file.exists()) {
-            file.delete();
+            if (!TextUtils.isEmpty(apkHash) && TextUtils.equals(getFileMD5(file), apkHash)) {
+                callback.onProgressUpdate(100);
+                callback.downloadSuc(getUriFromFile(context, file));
+                return;
+            } else {
+                reCreateFile(file);
+            }
         }
         ApkUpdate.threadPool.execute(new Runnable() {
             @Override
@@ -118,21 +135,26 @@ class ApkDownloadUtils {
         return apkUri;
     }
 
-    private void downloadApkByInnerMananger(String url, String name, String title, String description) {
+    private void downloadApkByInnerMananger(String url, String name, String title, String description, String apkHash) {
         DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url));
         request.setAllowedOverRoaming(true);
         request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE);
         request.setTitle(title);
         request.setDescription(description);
         request.setVisibleInDownloadsUi(true);
-        File file = new File(mContext.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS), name);
+        File file = new File(mContext.getExternalFilesDir(mDownDirPath), name);
         request.setDestinationUri(Uri.fromFile(file));
         mDownloadApkPath = file.getAbsolutePath();
         if (mDownloadManager == null) {
             mDownloadManager = (DownloadManager) mContext.getSystemService(Context.DOWNLOAD_SERVICE);
         }
         if (file.exists()) {
-            file.delete();
+            if (!TextUtils.isEmpty(apkHash) && TextUtils.equals(getFileMD5(file), apkHash)) {
+                installAPK();
+                return;
+            } else {
+                reCreateFile(file);
+            }
         }
         if (mDownloadManager != null) {
             mDownloadId = mDownloadManager.enqueue(request);
@@ -184,9 +206,61 @@ class ApkDownloadUtils {
             intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
             intent.setDataAndType(apkUri, "application/vnd.android.package-archive");
         } else {
-            intent.setDataAndType(Uri.fromFile(new File(Environment.DIRECTORY_DOWNLOADS, mFileName)), "application/vnd.android.package-archive");
+            intent.setDataAndType(Uri.fromFile(new File(mDownDirPath, mFileName)), "application/vnd.android.package-archive");
         }
         mContext.startActivity(intent);
+    }
+
+
+    private void deleteOtherCache(Context context, String fileName) {
+        File dir = context.getExternalFilesDir(mDownDirPath);
+        if (dir == null) {
+            dir.mkdirs();
+            return;
+        }
+        File[] files = dir.listFiles();
+        if (files == null) {
+            return;
+        }
+        for (File file : files) {
+            if (!file.getName().equals(fileName)) {
+                ApkUpdateLogUtils.d("delete cache file:" + file.getName());
+                file.delete();
+            }
+        }
+    }
+
+    private void reCreateFile(File file) {
+        ApkUpdateLogUtils.d("delete cache file:" + file.getName());
+        file.delete();
+        try {
+            file.createNewFile();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private String getFileMD5(File file) {
+        if (!file.isFile()) {
+            return null;
+        }
+        MessageDigest digest;
+        FileInputStream in;
+        byte[] buffer = new byte[1024];
+        int len;
+        try {
+            digest = MessageDigest.getInstance("MD5");
+            in = new FileInputStream(file);
+            while ((len = in.read(buffer, 0, 1024)) != -1) {
+                digest.update(buffer, 0, len);
+            }
+            in.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+        BigInteger bigInt = new BigInteger(1, digest.digest());
+        return bigInt.toString(16);
     }
 
 

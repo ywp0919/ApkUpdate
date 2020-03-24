@@ -22,4 +22,10 @@ class ApkUpdateLogUtils {
             Log.e(ApkUpdate.TAG, msg);
         }
     }
+
+    static void d(String msg) {
+        if (apkUpdateLogOpen) {
+            Log.d(ApkUpdate.TAG, msg);
+        }
+    }
 }
