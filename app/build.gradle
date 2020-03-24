@@ -35,5 +35,6 @@ dependencies {
 //    implementation project(path: ':apkupdate-lib')
 //    debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.2'
 
+
     implementation 'com.github.ywp0919:ApkUpdate:1.3.0'
 }
