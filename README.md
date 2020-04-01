@@ -70,77 +70,77 @@
  2. 
 ~~~
 ApkUpdate.newBuilder()
-                .setUpdateInfoUrl("https://wepon.oss-cn-hangzhou.aliyuncs.com/apkupdate_lib/updateInfo") // 获取升级信息接口，demo这步是乱填的。
-                // 设置了是否有更新的监听处理，如果设置了这个，内部就不会进行弹窗以及之后的流程了。
-                // 用户可以根据以下回调自定义 升级显示的UI. 如果使用内置的则不需要设置此方法 。
-                .setApkUpdateManagerListener(new ApkUpdateManagerListener() {
-                    @Override
-                    public void onNoUpdateAvailable() {
-                        // 没有更新
-                        tvShow.setText("自定义显示：没有更新");
-                    }
+      .setUpdateInfoUrl("https://wepon.oss-cn-hangzhou.aliyuncs.com/apkupdate_lib/updateInfo") // 获取升级信息接口，demo这步是乱填的。
+      // 设置了是否有更新的监听处理，如果设置了这个，内部就不会进行弹窗以及之后的流程了。
+      // 用户可以根据以下回调自定义 升级显示的UI. 如果使用内置的则不需要设置此方法 。
+      .setApkUpdateManagerListener(new ApkUpdateManagerListener() {
+          @Override
+          public void onNoUpdateAvailable() {
+              // 没有更新
+              tvShow.setText("自定义显示：没有更新");
+          }
 
-                    @Override
-                    public void onUpdateAvailable(final ApkUpdateBean apkUpdateBean) {
-                        // 有新的升级
-                        // 在这里用户可以自行下载，也可以调用sdk进行下载，如：
-                        // 注意，这里的url只能使用onUpdateAvailable回调的这个对象里面的url，不支持其他的。
+          @Override
+          public void onUpdateAvailable(final ApkUpdateBean apkUpdateBean) {
+              // 有新的升级
+              // 在这里用户可以自行下载，也可以调用sdk进行下载，如：
+              // 注意，这里的url只能使用onUpdateAvailable回调的这个对象里面的url，不支持其他的。
 
-                        // show update dialog
-                        new AlertDialog.Builder(MainActivity.this)
-                                .setTitle(apkUpdateBean.getUpdateTitle())
-                                .setMessage(apkUpdateBean.getUpdateLog())
-                                .setCancelable(true)
-                                .setPositiveButton("立即更新", new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialog, int which) {
-                                        // 同时可以显示下载的进度ui
-                                        tvShow.setText("自定义显示：开始更新");
+              // show update dialog
+              new AlertDialog.Builder(MainActivity.this)
+                      .setTitle(apkUpdateBean.getUpdateTitle())
+                      .setMessage(apkUpdateBean.getUpdateLog())
+                      .setCancelable(true)
+                      .setPositiveButton("立即更新", new DialogInterface.OnClickListener() {
+                          @Override
+                          public void onClick(DialogInterface dialog, int which) {
+                              // 同时可以显示下载的进度ui
+                              tvShow.setText("自定义显示：开始更新");
 
-                                        // 去下载更新。
-                                        ApkUpdate.downloadApk(apkUpdateBean.getApkDownloadUrl());
-                                    }
-                                })
-                                .create()
-                                .show();
+                              // 去下载更新。
+                              ApkUpdate.downloadApk(apkUpdateBean.getApkDownloadUrl());
+                          }
+                      })
+                      .create()
+                      .show();
 
-                        tvShow.setText("自定义显示：有更新");
-                    }
-                })
-                // 用户可以根据以下回调自定义下载的UI. 如果使用内置的则不需要设置此方法.
-                // 如果不接收回调，内部则会在下载完成后自动调用安装逻辑
-                // 主线程回调
-                .setApkDownloadListener(new ApkDownloadListener() {
-                    @Override
-                    public void downloadFailed(Throwable throwable) {
-                        // 下载失败
-                        // 可以取消进度ui
-                        Log.d("Wepon", "downloadFailed:" + throwable.getLocalizedMessage());
-                        tvShow.setText("自定义显示进度 ： 下载失败 ");
-                    }
+              tvShow.setText("自定义显示：有更新");
+          }
+      })
+      // 用户可以根据以下回调自定义下载的UI. 如果使用内置的则不需要设置此方法.
+      // 如果不接收回调，内部则会在下载完成后自动调用安装逻辑
+      // 主线程回调
+      .setApkDownloadListener(new ApkDownloadListener() {
+          @Override
+          public void downloadFailed(Throwable throwable) {
+              // 下载失败
+              // 可以取消进度ui
+              Log.d("Wepon", "downloadFailed:" + throwable.getLocalizedMessage());
+              tvShow.setText("自定义显示进度 ： 下载失败 ");
+          }
 
-                    @Override
-                    public void downloadSuc(Uri uri) {
-                        // 下载成功
-                        // 可以取消进度ui
-                        // 可以使用sdk的方法进行安装
-                        ApkUpdate.installApk(uri);
+          @Override
+          public void downloadSuc(Uri uri) {
+              // 下载成功
+              // 可以取消进度ui
+              // 可以使用sdk的方法进行安装
+              ApkUpdate.installApk(uri);
 
-                        Log.d("Wepon", "downloadSuc uri:" + uri.getPath());
+              Log.d("Wepon", "downloadSuc uri:" + uri.getPath());
 
-                        tvShow.setText("自定义显示进度 ： 下载完成 ");
-                    }
+              tvShow.setText("自定义显示进度 ： 下载完成 ");
+          }
 
-                    @Override
-                    public void onProgressUpdate(int progress) {
-                        // 进度回调，值为0-100.
-                        Log.d("Wepon", "progress:" + progress);
-                        // 可以刷新进度ui
-                        tvShow.setText("自定义显示进度 ： " + progress + "%");
+          @Override
+          public void onProgressUpdate(int progress) {
+              // 进度回调，值为0-100.
+              Log.d("Wepon", "progress:" + progress);
+              // 可以刷新进度ui
+              tvShow.setText("自定义显示进度 ： " + progress + "%");
 
-                    }
-                })
-                .update(this);
+          }
+      })
+      .update(this);
 ~~~
 
  3.配置接口的json字段，以及其他api的展示。
