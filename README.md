@@ -14,7 +14,7 @@
  2. app 里面需要依赖
 ~~~
 	dependencies {
-	        implementation 'com.github.ywp0919:ApkUpdate:1.3.0'
+	        implementation 'com.github.ywp0919:ApkUpdate:1.4.0'
 	}
 ~~~
 
