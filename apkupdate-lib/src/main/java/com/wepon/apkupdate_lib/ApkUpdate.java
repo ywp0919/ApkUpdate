@@ -29,11 +29,6 @@ import java.util.concurrent.Executors;
  * Description: 使用入口
  */
 public class ApkUpdate {
-
-    /**
-     * 这里就只设置2个限制的线程池，没必要太多。
-     * 并且线程池也可以给外部配置。
-     */
     static ExecutorService threadPool;
 
     static Handler mainHandler = new Handler(Looper.getMainLooper());
@@ -120,7 +115,7 @@ public class ApkUpdate {
 
         synchronized (ApkUpdate.class) {
             if (threadPool == null) {
-                threadPool = Executors.newFixedThreadPool(2);
+                threadPool = Executors.newCachedThreadPool();
             }
         }
     }
@@ -285,6 +280,8 @@ public class ApkUpdate {
 
                 }
             });
+        } else {
+            builder.setCancelable(false);
         }
         builder.create().show();
     }

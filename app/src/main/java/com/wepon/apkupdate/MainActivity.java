@@ -207,7 +207,7 @@ public class MainActivity extends AppCompatActivity {
     private String getTestUpdateJsonString() {
         return "{\n" +
                 "\"isNeedUpdate\": true,\n" +
-                "\"isForceUpdate\": false,\n" +
+                "\"isForceUpdate\": true,\n" +
                 "\"versionCode\": 2,\n" +
                 "\"versionName\": \"1.2\",\n" +
                 "\"updateTitle\": \"重大更新\",\n" +
